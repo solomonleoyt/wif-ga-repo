@@ -1,0 +1,41 @@
+name: start and stop gcp vm instance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  start-vm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/1000091428765/locations/global/workloadIdentityPools/wif-ga-pool/providers/github
+          service_account: wif-ga-sa@github-actions-testing-435312.iam.gserviceaccount.com
+      - name: Start GCE VM
+        run: |
+          gcloud compute instances start wif-ga-instance --zone=us-central1-a
+  stop-vm:
+    needs: start-vm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/1000091428765/locations/global/workloadIdentityPools/wif-ga-pool/providers/github
+          service_account: wif-ga-sa@github-actions-testing-435312.iam.gserviceaccount.com
+      - name: Stop GCE VM
+        run: |
+          gcloud compute instances stop wif-ga-instance --zone=us-central1-a
